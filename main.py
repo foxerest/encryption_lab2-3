@@ -32,8 +32,8 @@ def encrypt(text, alphabet, table):
 
             result += str(table[char_index][random.randint(0, len(table[char_index]) - 1)])
         else:
-            result += char
-    return result
+            return result, False
+    return result, True
 
 
 def decrypt(encrypted_text, alphabet, table):
@@ -63,19 +63,55 @@ def read_input_file(file_name):
     return result
 
 
+def write_output_file(file_name, text):
+    with open(file_name, "w") as f:
+        f.write(text)
+    f.close()
+
+
+def create_frequency_tables(alphabet, table, input_text, encrypted_text):
+    print("\nТаблиця із частотою символів у відкритому тексті")
+    for letter in alphabet:
+        print("\"{}\" ".format(letter), end="")
+        print("{} ".format(input_text.count(letter)))
+    print("\nТаблиця із частотою символів у криптограмі")
+    all_symbols = []
+    for row in table:
+        for symbol in row:
+            all_symbols.append(symbol)
+    all_symbols.sort()
+    for symbol in all_symbols:
+        print("\"{}\" ".format(symbol), end="")
+        print("{} ".format(encrypted_text.count(str(symbol))))
+    print("")
+
+
 def main():
-    ua_text = read_input_file("input_ua.txt").lower()
+    input_file_name = "input_ua.txt"
+    output_file_name = "output_ua.txt"
+    ua_text = read_input_file(input_file_name).lower()
     uk_alphabet = " абвгґдеєжзиіїйклмнопрстуфхцчшщьюя"
     table = generate_table(uk_alphabet)
-    encrypted_text = encrypt(ua_text, uk_alphabet, table)
-    decrypted_text = decrypt(encrypted_text, uk_alphabet, table)
+    encrypted_text, encryption_success = encrypt(ua_text, uk_alphabet, table)
+    if encryption_success:
+        decrypted_text = decrypt(encrypted_text, uk_alphabet, table)
 
-    print("Оригінальний текст з файлу українською:")
-    print(ua_text)
-    print("\nЗашифрований текст українською:")
-    print(encrypted_text)
-    print("\nДешифрований текст українською:")
-    print(decrypted_text)
+        print("Оригінальний текст з файлу українською:")
+        print(ua_text)
+        print("\nЗашифрований текст:")
+        print(encrypted_text)
+        print("\nДешифрований текст:")
+        print(decrypted_text)
+        write_output_file(output_file_name, decrypted_text)
+        print("\nПеревірка правильності кінцевого тексту:")
+        if ua_text == decrypted_text:
+            print("Оскількі текст однаковий перевірка пройдена!")
+        else:
+            print("Оскількі текст НЕ однаковий перевірка НЕ пройдена!")
+        create_frequency_tables(uk_alphabet, table, ua_text, encrypted_text)
+    else:
+        print("\nСхоже у тексті, який ви намагаєтесь зашифрувати, присутні некоректні символи."
+              "\nДопускається використання лише літер українського алфавіту та пробілів")
 
 
 if __name__ == "__main__":
